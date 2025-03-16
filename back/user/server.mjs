@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import helmet from 'helmet';
 import compression from 'compression';
 
-import Routes from './routes/route.mjs';
+import RouterUser from './routes/route.mjs';
 const { PORT, MONGODB_URI } = process.env;
 const app = express();
 
@@ -16,8 +16,9 @@ app.use(express.json({ limit: '10kb' }));
 app.use(helmet());
 app.use(compression());
 app.use(express.urlencoded({ extended: false }));
+
 // Rutas
-app.use('/api',Routes);
+app.use('/api', RouterUser); // Usa el Router de usuarios
 // Conexión a la base de datos
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,

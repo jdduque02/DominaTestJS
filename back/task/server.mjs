@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import helmet from 'helmet';
 import compression from 'compression';
 
-import Routes from './routes/route.mjs';
+import routesTask from './routes/route.mjs';
 const { PORT, MONGODB_URI } = process.env;
 const app = express();
 
@@ -17,7 +17,7 @@ app.use(helmet());
 app.use(compression());
 app.use(express.urlencoded({ extended: false }));
 // Rutas
-app.use('/api', Routes);
+app.use('/api', routesTask);
 // Conexión a la base de datos
 mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
@@ -27,5 +27,5 @@ mongoose.connect(MONGODB_URI, {
     .then(() => console.log('Conectado a MongoDB'))
 
 app.listen(PORT, () => {
-    console.log(`Servicio de usuarios ejecutándose en el puerto ${PORT}`);
+    console.log(`Servicio de tareas ejecutándose en el puerto ${PORT}`);
 });

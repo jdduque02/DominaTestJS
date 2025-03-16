@@ -22,21 +22,21 @@ export const createTask = async (req, res = response) => {
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al validar el token', error, null));
     }
-    if (!validateTokenUser.success) return res.status(401).send(validateTokenUser);
-
-    const { token, charge: { data: { username } } } = validateTokenUser;
+    if (!validateTokenUser.success) {
+        return res.status(401).send(Response(false, 'Error al validar el token', null, null));
+    }
+    const dateNow = new Date();
+    const { token, data: { data: { username } } } = validateTokenUser;
 
     const { title, description } = body;
 
-    const taskExists = await Task.findOne({ username, title, description, dueDate });
+    const taskExists = await Task.findOne({ username, title, description, created_at: dateNow });
 
     if (taskExists) return res.status(400).send(Response(false, 'La tarea ya existe', null, null));
 
-    const dateNow = new Date();
-
     let taskNew;
     try {
-        taskNew = await Task.create({ username, title, description, created_at: dateNow, updated_at: dateNow });
+        taskNew = await Task.create({ user: username, title, description, created_at: dateNow, updated_at: dateNow });
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al registrar la tarea', error, null));
     }
@@ -65,8 +65,9 @@ export const listTask = async (req, res = response) => {
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al validar el token', error, null));
     }
-    if (!validateTokenUser.success) return res.status(401).send(validateTokenUser);
-    const { token, charge: { data: { username } } } = validateTokenUser;
+    if (!validateTokenUser.success) return res.status(401).send(Response(false, 'Error al validar el token', null, null));
+    const { token, data: { data: { username } } } = validateTokenUser;
+
     let tasks;
     try {
         tasks = await Task.find({ username });
@@ -92,17 +93,17 @@ export const listTask = async (req, res = response) => {
  */
 
 export const deleteTask = async (req, res = response) => {
-    const { headers, params } = req;
+    const { headers, query } = req;
     let validateTokenUser;
     try {
         validateTokenUser = validateToken(headers);
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al validar el token', error, null));
     }
-    if (!validateTokenUser.success) return res.status(401).send(validateTokenUser);
-    const { token, charge: { data: { username } } } = validateTokenUser;
-    if (!params.id) return res.status(400).send(Response(false, 'Error en la estructura de datos', null, null));
-    const { id } = params;
+    if (!validateTokenUser.success) return res.status(401).send(Response(false, 'Error al validar el token', null, null));
+    const { token, data: { data: { username } } } = validateTokenUser;
+    if (!query.id) return res.status(400).send(Response(false, 'Error en la estructura de datos', null, null));
+    const { id } = query;
     let taskExists;
     try {
         taskExists = await Task.findById(id);
@@ -111,7 +112,7 @@ export const deleteTask = async (req, res = response) => {
     }
     if (!taskExists) return res.status(400).send(Response(false, 'La tarea no existe', null, null));
 
-    if (taskExists.username !== username) return res.status(400).send(Response(false, 'La tarea no pertenece a este usuario', null, null));
+    if (taskExists.user !== username) return res.status(400).send(Response(false, 'La tarea no pertenece a este usuario', null, null));
     let deleteTask;
     try {
         deleteTask = await Task.findByIdAndDelete(id);
@@ -138,22 +139,22 @@ export const deleteTask = async (req, res = response) => {
  */
 
 export const updateTask = async (req, res = response) => {
-    const { headers, params, body } = req;
+    const { headers, query, body } = req;
     let validateTokenUser;
     try {
         validateTokenUser = validateToken(headers);
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al validar el token', error, null));
     }
-    if (!validateTokenUser.success) return res.status(401).send(validateTokenUser);
+    if (!validateTokenUser.success) return res.status(401).send(Response(false, 'Error al validar el token', null, null));
 
-    const { token, charge: { data: { username } } } = validateTokenUser;
+    const { token, data: { data: { username } } } = validateTokenUser;
 
-    if (!params.id) return res.status(400).send(Response(false, 'Error en la estructura de datos', null, null));
+    if (!query.id) return res.status(400).send(Response(false, 'Error en la estructura de datos', null, null));
 
-    const { id } = params;
-
-    const { title, description, dueDate } = body;
+    const { id } = query;
+    if (!body.title && !body.description) return res.status(400).send(Response(false, 'Error en la estructura de datos', null, null));
+    const { title, description } = body;
 
     let taskExists;
     try {
@@ -162,12 +163,11 @@ export const updateTask = async (req, res = response) => {
         return res.status(500).send(Response(false, 'Error al obtener la tarea', error, null));
     }
     if (!taskExists) return res.status(400).send(Response(false, 'La tarea no existe', null, null));
-
-    if (taskExists.username !== username) return res.status(400).send(Response(false, 'La tarea no pertenece a este usuario', null, null));
+    if (taskExists.user !== username) return res.status(400).send(Response(false, 'La tarea no pertenece a este usuario', null, null));
 
     let updateTask;
     try {
-        updateTask = await Task.findByIdAndUpdate(id, { title, description, dueDate }, { new: true });
+        updateTask = await Task.findByIdAndUpdate(id, { title, description, updated_at: new Date() }, { new: true });
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al actualizar la tarea', error, null));
     }

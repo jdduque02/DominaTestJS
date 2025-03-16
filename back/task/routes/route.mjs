@@ -4,7 +4,7 @@ const RouterTask = Router();
 
 RouterTask.post('/task', createTask);
 RouterTask.get('/task', listTask);
-RouterTask.patch('/task/:id', updateTask);
-RouterTask.delete('/task/:id', deleteTask);
+RouterTask.patch('/task/:id?', updateTask);
+RouterTask.delete('/task/:id?', deleteTask);
 
 export default RouterTask;

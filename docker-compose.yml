@@ -1,45 +1,41 @@
-version: "3"
 services:
-  auth-service:
-    build: ./auth-service
+  user-service:
+    build: ./back/user
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=db
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_NAME=auth_db
+      - MONGODB_URI=mongodb://mongo:27017/user_db
+      - HASH_KEY_JWT=dominaTest
+      - HASH_KEY_USER=dominaSecretKey
+      - PORT=5000
     depends_on:
-      - db
+      - mongo
 
   task-service:
-    build: ./task-service
+    build: ./back/task
     ports:
       - "5001:5001"
     environment:
-      - DB_HOST=db
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_NAME=task_db
+      - MONGODB_URI=mongodb://mongo:27017/task_db
+      - HASH_KEY_JWT=dominaTest
+      - PORT=5001
     depends_on:
-      - db
-
+      - mongo
+  # Servicio de frontend
   frontend:
-    build: ./frontend
+    build: ./front # Ruta al Dockerfile del frontend
     ports:
       - "3000:3000"
-    depends_on:
-      - auth-service
-      - task-service
-
-  db:
-    image: postgres:13
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: auth_db
+      - REACT_APP_BASE_URL_API_SERVICE_TASK=http://localhost:5001/api # URL de la API TASK
+      - REACT_APP_BASE_URL_API_SERVICE_USER=http://localhost:5000/api # URL de la API USER
+
+  mongo:
+    image: mongo:4.4.4
+    ports:
+      - "27017:27017"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
 
 volumes:
-  postgres_data:
+  mongo_data:

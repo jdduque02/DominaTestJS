@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import Response from '../helper/response.mjs';
-import { response } from 'express';
 
 const { HASH_KEY_JWT } = process.env;
 
@@ -12,22 +11,22 @@ const { HASH_KEY_JWT } = process.env;
  * @returns {undefined}
  * @throws {Error} if the token is invalid or does not exist.
  */
-export const validateToken = (req, res = response, next) => {
-    const { headers } = req;
+export const validateToken = (headers) => {
     const token = headers['x-access-token'];
-    if (!token) return res.status(400).send(Response(false, 'token no encontrado', null, null));
+    if (!headers['x-access-token']) return Response(false, 'token no encontrado', null, null);
     let verfyToken;
     try {
         verfyToken = jwt.verify(token, HASH_KEY_JWT);
     } catch (error) {
-        return res.status(500).send(Response(false, 'Error al generar el token', error, null));
+        console.log(error);
+        return Response(false, 'Error al generar el token', error, null);
     }
-    if (!verfyToken) return res.status(401).send(Response(false, 'token no valido', null, null));
+    if (!verfyToken) return Response(false, 'token no valido', null, null)
     let { data, iat } = verfyToken;
     let today = new Date();
     today.setUTCHours(today.getUTCHours() - 5);
     if (iat <= today.getTime()) {
-        return res.status(401).send(Response(false, 'token expirado', null, null));
+        return Response(false, 'token expirado', null, null);
     }
     let expiresIn = today.setUTCHours(today.getUTCHours() + 2);
     let charge = {
@@ -39,25 +38,27 @@ export const validateToken = (req, res = response, next) => {
     try {
         newToken = jwt.sign(charge, HASH_KEY_JWT);
     } catch (error) {
-        return res.status(500).send(Response(false, 'Error al generar el token', error, null));
+        return Response(false, 'Error al generar el token', error, null);
     }
-    req.token = newToken;
-    next();
+    return Response(true, 'token valido', charge, newToken);
 }
 
 export const generateToken = (user) => {
+    const today = new Date();
+
     const charge = {
         data: {
             id: user._id,
             username: user.username
         },
         expiresIn: '1h',
-        iat: new Date()
+        iat: today.getTime()
     }
     let generateToken;
     try {
         generateToken = jwt.sign(charge, HASH_KEY_JWT);
     } catch (error) {
+        console.log(error);
         return Response(false, 'Error al generar el token', error, null);
     }
     return Response(true, 'Inicio de sesion exitoso', null, generateToken);

@@ -13,11 +13,12 @@ const { HASH_KEY_JWT } = process.env;
  */
 export const validateToken = (headers) => {
     const token = headers['x-access-token'];
-    if (!token) return Response(false, 'token no encontrado', null, null);
+    if (!headers['x-access-token']) return Response(false, 'token no encontrado', null, null);
     let verfyToken;
     try {
         verfyToken = jwt.verify(token, HASH_KEY_JWT);
     } catch (error) {
+        console.log(error);
         return Response(false, 'Error al generar el token', error, null);
     }
     if (!verfyToken) return Response(false, 'token no valido', null, null)
@@ -39,17 +40,19 @@ export const validateToken = (headers) => {
     } catch (error) {
         return Response(false, 'Error al generar el token', error, null);
     }
-    return { charge, token: newToken };
+    return Response(true, 'token valido', charge, newToken);
 }
 
 export const generateToken = (user) => {
+    const today = new Date();
+
     const charge = {
         data: {
             id: user._id,
             username: user.username
         },
         expiresIn: '1h',
-        iat: new Date()
+        iat: today.getTime()
     }
     let generateToken;
     try {

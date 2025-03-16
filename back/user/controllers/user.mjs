@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { response } from 'express';
 import User from '../models/user.mjs';
 import Response from '../helper/response.mjs';
@@ -38,13 +38,7 @@ export const createUser = async (req, res = response) => {
     } catch (error) {
         return res.status(500).send(Response(false, 'Error al registrar el usuario', error, null));
     }
-    let getToken;
-    try {
-        getToken = generateToken(userNew);
-    } catch (error) {
-        return res.status(500).send(Response(false, 'error al generar el token', error, null));
-    }
-    if (userNew) return res.status(201).send(Response(true, 'Usuario creado exitosamente', userNew, getToken));
+    if (userNew) return res.status(201).send(Response(true, 'Usuario creado exitosamente', userNew, null));
     return res.status(400).send(Response(false, 'Error al crear el usuario', null, null));
 }
 
@@ -77,6 +71,6 @@ export const loginUser = async (req, res = response) => {
     } catch (error) {
         return res.status(500).send(Response(false, 'error al generar el token', error, null));
     }
-
-    return res.status(200).send(Response(true, 'Inicio de sesion exitoso', null, getToken));
+    if (!getToken.success) return res.status(500).send(Response(false, 'Error al generar el token', null, null));
+    return res.status(200).send(Response(true, 'Inicio de sesion exitoso', null, getToken.token));
 }

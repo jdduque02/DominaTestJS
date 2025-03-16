@@ -1,25 +1,34 @@
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
+import './index.css'; // Importa Tailwind CSS
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-function App() {
+
+import Register from './pages/Auth/Register';
+import Login from './pages/Auth/Login';
+import TaskList from './pages/Task/TaskList';
+
+const App = () => {
+  const isAuthenticated =  (localStorage.getItem('isAuthenticated') === 'true');
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+    <Router>
+      <Routes>
+        {/* Ruta de inicio de sesión */}
+        <Route path="/login" element={<Login />} />
 
+        {/* Ruta de registro */}
+        <Route path="/register" element={<Register />} />
+
+        {/* Ruta de listado de tareas (protegida) */}
+        <Route
+          path="/tasks"
+          element={isAuthenticated ? <TaskList /> : <Navigate to="/login" />}
+        />
+
+        {/* Ruta por defecto (redirige a /login) */}
+        <Route path="/" element={<Navigate to="/login" />} />
+      </Routes>
+    </Router>
+  );
+};
 export default App;
