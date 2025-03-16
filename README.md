@@ -16,18 +16,15 @@ Para ejecutar el proyecto, asegúrate de tener instaladas las siguientes herrami
    ```bash
    cd ./DominaTestJS/
 2. Ejecuta el siguiente comando para construir y levantar los contenedores de Docker:
+    ```bash
     docker-compose up --build
-Este comando compilará la aplicación y levantará los servicios necesarios. Una vez completado, los servicios estarán disponibles en las siguientes rutas (si no se modifican los puertos en el archivo docker-compose.yml):
-
-Servicio de Usuarios: http://localhost:5000
-
-Ejemplo de ruta: http://localhost:5000/api/login
-
-Servicio de Tareas: http://localhost:5001
-
-Ejemplo de ruta: http://localhost:5001/api/task
-
-Frontend: http://localhost:3000/
+Este comando compilará la aplicación y levantará los servicios necesarios. 
+Una vez completado, los servicios estarán disponibles en las siguientes rutas (si no se modifican los puertos en el archivo docker-compose.yml):
+    Servicio de Usuarios: http://localhost:5000
+    Ejemplo de ruta: http://localhost:5000/api/login
+    Servicio de Tareas: http://localhost:5001
+    Ejemplo de ruta: http://localhost:5001/api/task
+    Frontend: http://localhost:3000/
 
 Modificación de Puertos: Si necesitas cambiar los puertos predeterminados, puedes hacerlo editando el archivo docker-compose.yml en la sección ports de cada servicio.
 
