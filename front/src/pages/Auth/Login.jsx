@@ -20,17 +20,21 @@ const Login = () =>{
         } catch (error) {
             setError(error);
         }
-        console.log(localStorage.getItem('isAuthenticated'),((localStorage.getItem('isAuthenticated') === 'true') || (localStorage.getItem('isAuthenticated'))));
-        if (!(localStorage.getItem('isAuthenticated') === 'true') || !(localStorage.getItem('isAuthenticated'))) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Credenciales incorrectas',
-            })
+        console.log(((localStorage.getItem('isAuthenticated') === 'true') || (localStorage.getItem('isAuthenticated'))));
+        if ((localStorage.getItem('isAuthenticated') === 'true') || (localStorage.getItem('isAuthenticated'))) {
+            navigate('/tasks');
+            window.location.href = '/tasks';
         }
         setIsLoading(false);
-        navigate('/tasks');
-        window.location.href = '/tasks';
+        return Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            timer: 10000,
+            text: 'Credenciales incorrectas',
+            timerProgressBar: true, // Muestra una barra de progreso
+            showConfirmButton: false // Oculta el botón de confirmación
+        })
+        
     };
     return (
         <div className="flex items-center justify-center min-h-screen bg-fund" >
